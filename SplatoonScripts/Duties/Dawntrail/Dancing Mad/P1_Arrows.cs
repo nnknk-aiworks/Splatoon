@@ -28,6 +28,7 @@ public class P1_Arrows : SplatoonScript
         """{{"Name":"{0}","type":0,"Enabled":false,"refX":{1},"refY":{2},"radius":0.5,"color":3358457600,"Filled":false,"fillIntensity":0.5,"overlayVOffset":2.0,"overlayFScale":1.0,"overlayText":"$ELEMENT","thicc":4.0,"faceplayer":"<1>","FillStep":0.5}}""";
 
     // Counterclockwise waypoints: same 16-cell footprint, circulation reversed.
+    // X = refX (game X), Z = refY (game Z / map depth axis), per Splatoon's Element model.
     private static readonly (string Name, float X, float Z)[] CcwElements =
     [
         ("↑↑ 1 CCW", 112, 106), ("↑↑ 2 CCW", 112, 100),
@@ -113,6 +114,7 @@ public class P1_Arrows : SplatoonScript
     string MyArrows;
     bool IsOrderReverse;
     string Variant => C.Counterclockwise ? " CCW" : "";
+
     public override void OnUpdate()
     {
         Controller.Hide();
@@ -120,7 +122,8 @@ public class P1_Arrows : SplatoonScript
         if(cnt == 2)
         {
             DetermineArrow(Controller.BasePlayer);
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?2:1)}{Variant}", out var e1))
+            var firstName = $"{MyArrows} {(IsOrderReverse?2:1)}{Variant}";
+            if(Controller.TryGetElementByName(firstName, out var e1))
             {
                 e1.Enabled = true;
                 e1.color = Controller.AttentionColor;
@@ -128,9 +131,10 @@ public class P1_Arrows : SplatoonScript
             }
             else
             {
-                PluginLog.Error($"Can't fing element 1 for {MyArrows}");
+                PluginLog.Error($"Can't find element '{firstName}'");
             }
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse ? 1 : 2)}{Variant}", out var e2))
+            var secondName = $"{MyArrows} {(IsOrderReverse ? 1 : 2)}{Variant}";
+            if(Controller.TryGetElementByName(secondName, out var e2))
             {
                 e2.Enabled = true;
                 e2.color = Controller.OriginalElements[e2.Name].color;
@@ -138,12 +142,13 @@ public class P1_Arrows : SplatoonScript
             }
             else
             {
-                PluginLog.Error($"Can't fing element 2 for {MyArrows}");
+                PluginLog.Error($"Can't find element '{secondName}'");
             }
         }
         else if(cnt == 1)
         {
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?1:2)}{Variant}", out var e2))
+            var secondName = $"{MyArrows} {(IsOrderReverse?1:2)}{Variant}";
+            if(Controller.TryGetElementByName(secondName, out var e2))
             {
                 e2.Enabled = true;
                 e2.color = Controller.AttentionColor;
@@ -151,7 +156,7 @@ public class P1_Arrows : SplatoonScript
             }
             else
             {
-                PluginLog.Error($"Can't fing element 2 for {MyArrows}");
+                PluginLog.Error($"Can't find element '{secondName}'");
             }
         }
     }
