@@ -112,6 +112,7 @@ public class P1_Arrows : SplatoonScript
 
     string MyArrows;
     bool IsOrderReverse;
+    string Variant => C.Counterclockwise ? " CCW" : "";
     public override void OnUpdate()
     {
         Controller.Hide();
@@ -119,7 +120,7 @@ public class P1_Arrows : SplatoonScript
         if(cnt == 2)
         {
             DetermineArrow(Controller.BasePlayer);
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?2:1)}", out var e1))
+            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?2:1)}{Variant}", out var e1))
             {
                 e1.Enabled = true;
                 e1.color = Controller.AttentionColor;
@@ -129,7 +130,7 @@ public class P1_Arrows : SplatoonScript
             {
                 PluginLog.Error($"Can't fing element 1 for {MyArrows}");
             }
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse ? 1 : 2)}", out var e2))
+            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse ? 1 : 2)}{Variant}", out var e2))
             {
                 e2.Enabled = true;
                 e2.color = Controller.OriginalElements[e2.Name].color;
@@ -142,7 +143,7 @@ public class P1_Arrows : SplatoonScript
         }
         else if(cnt == 1)
         {
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?1:2)}", out var e2))
+            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?1:2)}{Variant}", out var e2))
             {
                 e2.Enabled = true;
                 e2.color = Controller.AttentionColor;
