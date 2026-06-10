@@ -1,9 +1,12 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons;
+using ECommons.Configuration;
 using ECommons.Logging;
 using Splatoon.SplatoonScripting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -11,8 +14,15 @@ namespace SplatoonScriptsOfficial.Duties.Dawntrail.Dancing_Mad;
 
 public class P1_Arrows : SplatoonScript
 {
-    public override Metadata Metadata { get; } = new(1, "NightmareXIV");
+    public override Metadata Metadata { get; } = new(2, "NightmareXIV");
     public override HashSet<uint>? ValidTerritories { get; } = [1363];
+
+    private Config C => Controller.GetConfig<Config>();
+
+    private sealed class Config : IEzConfig
+    {
+        public bool Counterclockwise = false;
+    }
 
     public override void OnSetup()
     {
