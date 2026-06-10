@@ -171,6 +171,14 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
     private InterludeNavPhase _interludeNavPhase;
     private bool _interludeBossCastSeen;
 
+    // Last clean live-role resolution, latched per wave (_step). Steps 2-8 recompute the pattern
+    // from exact live debuff counts every frame, which momentarily fails during the debuff
+    // apply/expire window between waves; holding the last good result for the same wave keeps the
+    // "where to go" marker from flickering off. Step 1 already latches via _initialGroupResolved.
+    private int _liveRolesStep = -1;
+    private int _liveRolesPatternId = -1;
+    private string? _liveRolesRoleLabel;
+
     #endregion
 
     #region Types
@@ -1021,6 +1029,9 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
         _initialGroupResolved = false;
         _interludeNavPhase = InterludeNavPhase.None;
         _interludeBossCastSeen = false;
+        _liveRolesStep = -1;
+        _liveRolesPatternId = -1;
+        _liveRolesRoleLabel = null;
 
         if(Controller.TryGetElementByName(ElActiveTower0, out var tower0))
             tower0.Enabled = false;
@@ -1065,7 +1076,7 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
         if(TryGetInterludeNavPosition(out var interludePosition, out var interludeLabel))
         {
             DisableDualMarkers();
-            EnableRoleMarker(ElMyRole, interludePosition, interludeLabel, tether: true);
+            EnableRoleMarker(ElMyRole, interludePosition, interludeLabel, tether: true, showText: true);
             return;
         }
 
@@ -1135,15 +1146,18 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
         EnableRoleMarker(ElMyRole, position, roleLabel, tether: true);
     }
 
+    // Station role circles render no overlay text by default (only the ring/tether matters). Callers
+    // that carry a genuinely useful hint (interlude navigation, debug pattern preview) opt in via
+    // showText.
     private void EnableRoleMarker(string elementName, Vector3 position, string label, bool tether,
-        uint? color = null)
+        uint? color = null, bool showText = false)
     {
         if(!Controller.TryGetElementByName(elementName, out var element))
             return;
 
         element.SetRefPosition(position);
         element.color = color ?? Controller.AttentionColor;
-        element.overlayText = label;
+        element.overlayText = showText ? label : "";
         element.tether = tether;
         element.Enabled = true;
     }
@@ -1260,7 +1274,8 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
             if(ResolvePositionRule(GetConfiguredRule(C.DebugPatternPreview, i)) is not { } position)
                 continue;
 
-            EnableRoleMarker(GetRolePreviewElementName(i), position, pattern.Assignments[i].Label, showRoleTether);
+            EnableRoleMarker(GetRolePreviewElementName(i), position, pattern.Assignments[i].Label, showRoleTether,
+                showText: true);
         }
     }
 
@@ -1935,6 +1950,28 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
     }
 
     private bool TryUpdateLiveRoles(out int patternId, out string roleLabel)
+    {
+        if(TryComputeLiveRoles(out patternId, out roleLabel))
+        {
+            _liveRolesStep = _step;
+            _liveRolesPatternId = patternId;
+            _liveRolesRoleLabel = roleLabel;
+            return true;
+        }
+
+        // Live computation transiently failed (debuff counts not yet settled this frame). Reuse the
+        // last clean result for the same wave so the marker holds instead of blinking off.
+        if(_liveRolesStep == _step && _liveRolesPatternId >= 0 && _liveRolesRoleLabel != null)
+        {
+            patternId = _liveRolesPatternId;
+            roleLabel = _liveRolesRoleLabel;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryComputeLiveRoles(out int patternId, out string roleLabel)
     {
         patternId = -1;
         roleLabel = "";
