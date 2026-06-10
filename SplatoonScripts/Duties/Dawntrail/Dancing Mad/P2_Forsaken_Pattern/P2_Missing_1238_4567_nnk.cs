@@ -40,7 +40,7 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
     private const uint PastsEndCast = 47827;
     private const uint AllThingsEndingCast1 = 47836;
     private const uint AllThingsEndingCast2 = 47837;
-    private const float InterludeNavDistanceFromCenter = 4f;
+    private const float InterludeNavDistanceFromCenter = 6f;
 
     // Map effect indices 1-8 (P2_Forsaken_beta): spawn 1/2, clear 4/8.
     private const uint MapEffectTowerIndexMin = 1;
@@ -1076,7 +1076,7 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
         if(TryGetInterludeNavPosition(out var interludePosition, out var interludeLabel))
         {
             DisableDualMarkers();
-            EnableRoleMarker(ElMyRole, interludePosition, interludeLabel, tether: true, showText: true);
+            EnableRoleMarker(ElMyRole, interludePosition, interludeLabel, tether: true);
             return;
         }
 
