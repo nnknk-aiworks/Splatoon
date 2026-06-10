@@ -155,4 +155,10 @@ public class P1_Arrows : SplatoonScript
             }
         }
     }
+
+    public override void OnSettingsDraw()
+    {
+        ImGui.Checkbox("Counterclockwise (mirror handedness)", ref C.Counterclockwise);
+        ImGui.TextDisabled("Mirrors the arrow waypoints. Default off = clockwise (unchanged).");
+    }
 }
