@@ -19,7 +19,7 @@ using Splatoon.Utility;
 
 namespace SplatoonScriptsOfficial.Duties.Dawntrail.Dancing_Mad;
 
-internal class P2_Missing_1238_4567_nnk : SplatoonScript
+internal class P2_Missing_1238_4567_Fix_Partner_Mixed : SplatoonScript
 {
     #region Metadata
 
@@ -433,7 +433,7 @@ internal class P2_Missing_1238_4567_nnk : SplatoonScript
 
     public override void OnSettingsDraw()
     {
-        if(ImGui.BeginTabBar("##P212384567nnkSettings"))
+        if(ImGui.BeginTabBar("##P212384567FixPartnerMixedSettings"))
         {
             if(ImGui.BeginTabItem("Main###tabMain"))
             {
