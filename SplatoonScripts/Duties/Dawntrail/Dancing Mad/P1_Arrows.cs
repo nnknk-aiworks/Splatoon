@@ -1,9 +1,12 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons;
+using ECommons.Configuration;
 using ECommons.Logging;
 using Splatoon.SplatoonScripting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -11,8 +14,32 @@ namespace SplatoonScriptsOfficial.Duties.Dawntrail.Dancing_Mad;
 
 public class P1_Arrows : SplatoonScript
 {
-    public override Metadata Metadata { get; } = new(1, "NightmareXIV");
+    public override Metadata Metadata { get; } = new(2, "NightmareXIV");
     public override HashSet<uint>? ValidTerritories { get; } = [1363];
+
+    private Config C => Controller.GetConfig<Config>();
+
+    private sealed class Config : IEzConfig
+    {
+        public bool Counterclockwise = false;
+    }
+
+    private const string CcwElementTemplate =
+        """{{"Name":"{0}","type":0,"Enabled":false,"refX":{1},"refY":{2},"radius":0.5,"color":3358457600,"Filled":false,"fillIntensity":0.5,"overlayVOffset":2.0,"overlayFScale":1.0,"overlayText":"$ELEMENT","thicc":4.0,"faceplayer":"<1>","FillStep":0.5}}""";
+
+    // Counterclockwise waypoints: same 16-cell footprint, circulation reversed.
+    // X = refX (game X), Z = refY (game Z / map depth axis), per Splatoon's Element model.
+    private static readonly (string Name, float X, float Z)[] CcwElements =
+    [
+        ("↑↑ 1 CCW", 112, 106), ("↑↑ 2 CCW", 112, 100),
+        ("↓↓ 1 CCW", 88, 94),   ("↓↓ 2 CCW", 88, 100),
+        ("→→ 1 CCW", 94, 112),  ("→→ 2 CCW", 100, 112),
+        ("←← 1 CCW", 106, 88),  ("←← 2 CCW", 100, 88),
+        ("↑→ 1 CCW", 112, 112), ("↑→ 2 CCW", 106, 112),
+        ("↓← 1 CCW", 88, 88),   ("↓← 2 CCW", 94, 88),
+        ("↑← 1 CCW", 112, 94),  ("↑← 2 CCW", 112, 88),
+        ("↓→ 1 CCW", 88, 106),  ("↓→ 2 CCW", 88, 112),
+    ];
 
     public override void OnSetup()
     {
@@ -43,6 +70,13 @@ public class P1_Arrows : SplatoonScript
             {"Name":"↓→ 2","type":0,"Enabled":true,"refX":106.0,"refY":88.0,"refZ":0.0,"offX":0.0,"offY":0.0,"offZ":0.0,"radius":0.5,"color":3358457600,"Filled":false,"fillIntensity":0.5,"overlayBGColor":1879048192,"overlayTextColor":3372220415,"overlayVOffset":2.0,"overlayFScale":1.0,"overlayPlaceholders":false,"thicc":4.0,"overlayText":"$ELEMENT","refActorName":"","refActorTargetingYou":0,"refActorNamePlateIconID":0,"refActorComparisonAnd":false,"refActorRequireCast":false,"refActorCastReverse":false,"refActorUseCastTime":false,"refActorCastTimeMin":0.0,"refActorCastTimeMax":0.0,"refActorUseOvercast":false,"refTargetYou":false,"refActorRequireBuff":false,"refActorRequireAllBuffs":false,"refActorRequireBuffsInvert":false,"refActorUseBuffTime":false,"refActorUseBuffParam":false,"refActorBuffTimeMin":0.0,"refActorBuffTimeMax":0.0,"refActorObjectLife":false,"TargetAlteration":0,"refActorComparisonType":0,"refActorType":0,"includeHitbox":false,"includeOwnHitbox":false,"includeRotation":false,"onlyTargetable":false,"onlyUnTargetable":false,"onlyVisible":false,"tether":false,"ExtraTetherLength":0.0,"LineEndA":0,"LineEndB":0,"AdditionalRotation":0.0,"LineAddHitboxLengthX":false,"LineAddHitboxLengthY":false,"LineAddHitboxLengthZ":false,"LineAddHitboxLengthXA":false,"LineAddHitboxLengthYA":false,"LineAddHitboxLengthZA":false,"LineAddPlayerHitboxLengthX":false,"LineAddPlayerHitboxLengthY":false,"LineAddPlayerHitboxLengthZ":false,"LineAddPlayerHitboxLengthXA":false,"LineAddPlayerHitboxLengthYA":false,"LineAddPlayerHitboxLengthZA":false,"FaceMe":false,"LimitDistance":false,"LimitDistanceInvert":false,"DistanceSourceX":0.0,"DistanceSourceY":0.0,"DistanceSourceZ":0.0,"DistanceMin":0.0,"DistanceMax":0.0,"UseDistanceSourcePlaceholder":false,"LimitRotation":false,"refActorTether":false,"refActorTetherTimeMin":0.0,"refActorTetherTimeMax":0.0,"refActorTetherParam1":null,"refActorTetherParam2":null,"refActorTetherParam3":null,"refActorIsTetherSource":null,"refActorIsTetherInvert":false,"refActorIsTetherLive":false,"refActorUseTransformation":false,"mechanicType":0,"refMark":false,"refMarkID":0,"faceplayer":"<1>","FaceInvert":false,"FillStep":0.5,"LegacyFill":false,"RenderEngineKind":0,"Conditional":false,"RotationOverride":false,"IsCapturing":false,"Nodraw":false,"UseHitboxRadius":false,"MapEffectInvert":false,"MapEffectAnd":false,"UseCastRotation":false,"UseCastPosition":false,"UseCastTarget":false,"IsDead":null,"Enumeration":0,"AnimationInverted":false}
             
             """);
+
+        foreach(var e in CcwElements)
+        {
+            Controller.RegisterElementFromCode(e.Name,
+                string.Format(CultureInfo.InvariantCulture, CcwElementTemplate, e.Name, e.X, e.Z),
+                overwrite: true);
+        }
     }
 
     Dictionary<uint, string> Arrows = new()
@@ -79,6 +113,8 @@ public class P1_Arrows : SplatoonScript
 
     string MyArrows;
     bool IsOrderReverse;
+    string Variant => C.Counterclockwise ? " CCW" : "";
+
     public override void OnUpdate()
     {
         Controller.Hide();
@@ -86,7 +122,8 @@ public class P1_Arrows : SplatoonScript
         if(cnt == 2)
         {
             DetermineArrow(Controller.BasePlayer);
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?2:1)}", out var e1))
+            var firstName = $"{MyArrows} {(IsOrderReverse?2:1)}{Variant}";
+            if(Controller.TryGetElementByName(firstName, out var e1))
             {
                 e1.Enabled = true;
                 e1.color = Controller.AttentionColor;
@@ -94,9 +131,10 @@ public class P1_Arrows : SplatoonScript
             }
             else
             {
-                PluginLog.Error($"Can't fing element 1 for {MyArrows}");
+                PluginLog.Error($"Can't find element '{firstName}'");
             }
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse ? 1 : 2)}", out var e2))
+            var secondName = $"{MyArrows} {(IsOrderReverse ? 1 : 2)}{Variant}";
+            if(Controller.TryGetElementByName(secondName, out var e2))
             {
                 e2.Enabled = true;
                 e2.color = Controller.OriginalElements[e2.Name].color;
@@ -104,12 +142,13 @@ public class P1_Arrows : SplatoonScript
             }
             else
             {
-                PluginLog.Error($"Can't fing element 2 for {MyArrows}");
+                PluginLog.Error($"Can't find element '{secondName}'");
             }
         }
         else if(cnt == 1)
         {
-            if(Controller.TryGetElementByName($"{MyArrows} {(IsOrderReverse?1:2)}", out var e2))
+            var secondName = $"{MyArrows} {(IsOrderReverse?1:2)}{Variant}";
+            if(Controller.TryGetElementByName(secondName, out var e2))
             {
                 e2.Enabled = true;
                 e2.color = Controller.AttentionColor;
@@ -117,8 +156,14 @@ public class P1_Arrows : SplatoonScript
             }
             else
             {
-                PluginLog.Error($"Can't fing element 2 for {MyArrows}");
+                PluginLog.Error($"Can't find element '{secondName}'");
             }
         }
+    }
+
+    public override void OnSettingsDraw()
+    {
+        ImGui.Checkbox("Counterclockwise (mirror handedness)", ref C.Counterclockwise);
+        ImGui.TextDisabled("Mirrors the arrow waypoints. Default off = clockwise (unchanged).");
     }
 }
