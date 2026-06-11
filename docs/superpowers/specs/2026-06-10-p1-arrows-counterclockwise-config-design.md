@@ -52,18 +52,19 @@ Convention: `point1 = first-expiring arrow`, `point2 = second arrow`.
 
 | Pair | Point 1 (first) | Point 2 (second) |
 |------|-----------------|------------------|
-| ↑↑ | ↑ (112,106) E edge S | ↑ (112,100) E edge mid |
-| ↓↓ | ↓ (88,94) W edge N | ↓ (88,100) W edge mid |
-| →→ | → (94,112) S edge W | → (100,112) S edge mid |
-| ←← | ← (106,88) N edge E | ← (100,88) N edge mid |
+| ↑↑ | ↑ (112,100) E edge mid | ↑ (112,106) E edge S |
+| ↓↓ | ↓ (88,100) W edge mid | ↓ (88,94) W edge N |
+| →→ | → (100,112) S edge mid | → (94,112) S edge W |
+| ←← | ← (100,88) N edge mid | ← (106,88) N edge E |
 | ↑→ | ↑ (112,112) SE corner | → (106,112) S edge E |
 | ↓← | ↓ (88,88) NW corner | ← (94,88) N edge W |
 | ↑← | ↑ (112,94) E edge N | ← (112,88) NE corner |
 | ↓→ | ↓ (88,106) W edge S | → (88,112) SW corner |
 
 Corners (CCW): NW = ↓, NE = ←, SE = ↑, SW = →. Each corner points along the edge
-it turns into under CCW flow. Same-arrow pairs are clean mirrors (↑↑/↓↓ flip
-W↔E, →→/←← flip N↔S); mixed pairs move to the opposite corner — there is no single
+it turns into under CCW flow. Same-arrow pairs use the mirrored footprint (↑↑/↓↓
+flip W↔E, →→/←← flip N↔S) but resolve the on-axis (cardinal) cell first and the
+off-axis cell second; mixed pairs move to the opposite corner — there is no single
 geometric transform, so positions are declared explicitly.
 
 CCW arrow-direction → edge: ↓ on W edge (incl. NW corner), ← on N edge (incl. NE

@@ -31,10 +31,11 @@ public class P1_Arrows : SplatoonScript
     // X = refX (game X), Z = refY (game Z / map depth axis), per Splatoon's Element model.
     private static readonly (string Name, float X, float Z)[] CcwElements =
     [
-        ("↑↑ 1 CCW", 112, 106), ("↑↑ 2 CCW", 112, 100),
-        ("↓↓ 1 CCW", 88, 94),   ("↓↓ 2 CCW", 88, 100),
-        ("→→ 1 CCW", 94, 112),  ("→→ 2 CCW", 100, 112),
-        ("←← 1 CCW", 106, 88),  ("←← 2 CCW", 100, 88),
+        // Same-direction pairs resolve the on-axis (cardinal) cell first, then the off-axis cell.
+        ("↑↑ 1 CCW", 112, 100), ("↑↑ 2 CCW", 112, 106),
+        ("↓↓ 1 CCW", 88, 100),  ("↓↓ 2 CCW", 88, 94),
+        ("→→ 1 CCW", 100, 112), ("→→ 2 CCW", 94, 112),
+        ("←← 1 CCW", 100, 88),  ("←← 2 CCW", 106, 88),
         ("↑→ 1 CCW", 112, 112), ("↑→ 2 CCW", 106, 112),
         ("↓← 1 CCW", 88, 88),   ("↓← 2 CCW", 94, 88),
         ("↑← 1 CCW", 112, 94),  ("↑← 2 CCW", 112, 88),
