@@ -122,28 +122,30 @@ internal class P2_Missing_1238_4567_Fix_Partner_Mixed : SplatoonScript
 
     private static readonly PatternDefinition[] Patterns =
     [
-        // Positions follow the base P2_Missing_1238_4567 layout with two tweaks:
-        // 211 RightTowerSpread 90 -> 135 (due-left of the right tower),
-        // 022 LeftDemise1 315 -> 330 (nudged slightly right).
+        // Positions tuned with the visual positioner against the SW-cone / SE-spread
+        // reference config: left-tower cone pair on the map-south side of the cone tower,
+        // stack pair on the map-west side (in-tower stack nudged south); right-tower stacks
+        // and the 022 spreads / demise points nudged to match. angleDeg is tower-relative:
+        // 0 = outward from center, 180 = toward center, 90 = player-left when facing center.
         new(0, 2, 1, 1,
         [
-            Rule("211_LeftTowerStack", PositionBasis.LeftTower, 60f, DefaultRangeInside),
-            Rule("211_LeftTowerCone", PositionBasis.LeftTower, 330f, DefaultRangeInside),
-            Rule("211_LeftTowerStackOutside", PositionBasis.LeftTower, 60f, DefaultRangeOutside),
-            Rule("211_LeftTowerBaitCone", PositionBasis.LeftTower, 330f, DefaultRangeOutside),
-            Rule("211_RightTowerStack", PositionBasis.RightTower, 270f, DefaultRangeInside),
+            Rule("211_LeftTowerStack", PositionBasis.LeftTower, 40f, DefaultRangeInside),
+            Rule("211_LeftTowerCone", PositionBasis.LeftTower, 315f, DefaultRangeInside),
+            Rule("211_LeftTowerStackOutside", PositionBasis.LeftTower, 45f, DefaultRangeOutside),
+            Rule("211_LeftTowerBaitCone", PositionBasis.LeftTower, 315f, DefaultRangeOutside),
+            Rule("211_RightTowerStack", PositionBasis.RightTower, 285f, DefaultRangeInside),
             Rule("211_RightTowerSpread", PositionBasis.RightTower, 135f, DefaultRangeInside),
-            Rule("211_RightTowerStackOutside", PositionBasis.RightTower, 270f, DefaultRangeOutside),
+            Rule("211_RightTowerStackOutside", PositionBasis.RightTower, 285f, DefaultRangeOutside),
         ]),
         new(1, 0, 2, 2,
         [
             Rule("022_LeftTowerConeLeft", PositionBasis.LeftTower, 30f, DefaultRangeInside),
             Rule("022_LeftTowerConeRight", PositionBasis.LeftTower, 0f, DefaultRangeInside),
-            Rule("022_RightTowerSpreadLeft", PositionBasis.RightTower, 90f, DefaultRangeInside),
-            Rule("022_RightTowerSpreadRight", PositionBasis.RightTower, 270f, DefaultRangeInside),
-            Rule("022_LeftDemise1", PositionBasis.Center, 330f, 3.5f),
+            Rule("022_RightTowerSpreadLeft", PositionBasis.RightTower, 120f, DefaultRangeInside),
+            Rule("022_RightTowerSpreadRight", PositionBasis.RightTower, 300f, DefaultRangeInside),
+            Rule("022_LeftDemise1", PositionBasis.Center, 345f, 3.5f),
             Rule("022_LeftDemise2", PositionBasis.Center, 225f, 3.5f),
-            Rule("022_RightDemise3", PositionBasis.Center, 45f, 3.55f),
+            Rule("022_RightDemise3", PositionBasis.Center, 50f, 3.55f),
             Rule("022_RightDemise4", PositionBasis.Center, 135f, 3.5f),
         ]),
     ];
@@ -483,6 +485,15 @@ internal class P2_Missing_1238_4567_Fix_Partner_Mixed : SplatoonScript
         ImGui.Spacing();
         ImGui.TextUnformatted($"Pattern assignments ({PatternCount} patterns)");
         ImGui.Separator();
+
+        if(ImGui.Button("Reset positions to script defaults"))
+        {
+            C.PatternRules = CreateDefaultPatternRules();
+            OnPatternRulesChanged();
+        }
+        ImGui.SameLine();
+        ImGui.TextDisabled("(positions only; keeps the priority list)");
+        ImGui.Spacing();
 
         foreach(var pattern in Patterns)
         {
